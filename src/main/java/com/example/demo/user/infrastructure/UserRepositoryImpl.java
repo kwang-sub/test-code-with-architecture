@@ -1,5 +1,6 @@
 package com.example.demo.user.infrastructure;
 
+import com.example.demo.user.domain.User;
 import com.example.demo.user.domain.UserStatus;
 import com.example.demo.user.service.port.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -13,23 +14,30 @@ public class UserRepositoryImpl implements UserRepository {
 
     private final UserJpaRepository userJpaRepository;
 
+
     @Override
-    public Optional<UserEntity> findByIdAndStatus(long id, UserStatus userStatus) {
-        return userJpaRepository.findByIdAndStatus(id, userStatus);
+    public Optional<User> findById(Long id) {
+        return userJpaRepository.findById(id)
+                .map(UserEntity::toModel);
     }
 
     @Override
-    public Optional<UserEntity> findByEmailEqualsAndStatus(String email, UserStatus userStatus) {
-        return userJpaRepository.findByEmailEqualsAndStatus(email, userStatus);
+    public Optional<User> findByIdAndStatus(long id, UserStatus userStatus) {
+        return userJpaRepository.findByIdAndStatus(id, userStatus)
+                .map(UserEntity::toModel);
     }
 
     @Override
-    public UserEntity save(UserEntity userEntity) {
-        return userJpaRepository.save(userEntity);
+    public Optional<User> findByEmailEqualsAndStatus(String email, UserStatus userStatus) {
+        return userJpaRepository.findByEmailEqualsAndStatus(email, userStatus)
+                .map(UserEntity::toModel);
     }
 
     @Override
-    public Optional<UserEntity> findById(Long id) {
-        return userJpaRepository.findById(id);
+    public User save(User user) {
+        return userJpaRepository.save(UserEntity.fromModel(user))
+                .toModel();
     }
+
+
 }

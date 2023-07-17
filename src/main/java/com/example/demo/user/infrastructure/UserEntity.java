@@ -1,16 +1,11 @@
 package com.example.demo.user.infrastructure;
 
+import com.example.demo.user.domain.User;
 import com.example.demo.user.domain.UserStatus;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.beans.BeanUtils;
 
 @Getter
 @Setter
@@ -40,4 +35,22 @@ public class UserEntity {
 
     @Column(name = "last_login_at")
     private Long lastLoginAt;
+
+    public static UserEntity fromModel(User user) {
+        UserEntity userEntity = new UserEntity();
+        BeanUtils.copyProperties(user, userEntity);
+        return userEntity;
+    }
+
+    public User toModel() {
+        return User.builder()
+                .id(this.getId())
+                .email(this.getEmail())
+                .nickname(this.getNickname())
+                .certificationCode(this.getCertificationCode())
+                .address(this.getAddress())
+                .status(this.getStatus())
+                .lastLoginAt(this.getLastLoginAt())
+                .build();
+    }
 }
