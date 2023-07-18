@@ -1,12 +1,13 @@
 package com.example.demo.user.service;
 
 import com.example.demo.common.domain.exception.ResourceNotFoundException;
+import com.example.demo.common.sevice.port.ClockHolder;
+import com.example.demo.common.sevice.port.UuidHolder;
+import com.example.demo.user.controller.port.*;
 import com.example.demo.user.domain.User;
 import com.example.demo.user.domain.UserStatus;
 import com.example.demo.user.domain.UserCreate;
 import com.example.demo.user.domain.UserUpdate;
-
-import java.time.Clock;
 
 import com.example.demo.user.service.port.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -15,10 +16,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-public class UserService {
+public class UserServiceImpl implements AuthenticationService, UserReadService, UserCreateService, UserUpdateService {
 
     private final UserRepository userRepository;
     private final CertificationService certificationService;
+    private final UuidHolder uuidHolder;
+    private final ClockHolder clockHolder;
 
 
     public User getByEmail(String email) {
@@ -33,7 +36,7 @@ public class UserService {
 
     @Transactional
     public User create(UserCreate userCreate) {
-        User user = User.from(userCreate);
+        User user = User.from(userCreate, uuidHolder);
 
         user = userRepository.save(user);
         certificationService.send(userCreate.getEmail(), user.getId(), user.getCertificationCode());
@@ -51,7 +54,7 @@ public class UserService {
     @Transactional
     public void login(long id) {
         User user = userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Users", id));
-        user = user.login(Clock.systemUTC().millis());
+        user = user.login(clockHolder);
         userRepository.save(user);
     }
 
